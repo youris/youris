@@ -40,7 +40,7 @@
 			<h1><?php echo $this->Html->link(__('Youris', true), 'http://www.youris.netsons.org'); ?></h1>
 		</div>
 		<div id="content">
-                        <!-- flash message -> impostato con $this->Session->setFlash() -->
+            <!-- flash message -> impostato con $this->Session->setFlash() -->
 			<?php echo $this->Session->flash(); ?>
 
 			<?php echo $content_for_layout; ?> <!-- stampa contenuto della vista -->
