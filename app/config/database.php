@@ -79,7 +79,7 @@ class DATABASE_CONFIG {
 		'host' => 'localhost',
 		'login' => 'root',
 		'password' => 'mysql',
-		'database' => 'testCake',
+		'database' => 'youris',
 		'prefix' => '',
 	);
 
