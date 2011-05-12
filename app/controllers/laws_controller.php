@@ -6,10 +6,13 @@ class LawsController extends AppController {
     var $name = 'Laws';
 	
 	public function index($id = null){
-		$this->pageTitle = 'Laws list';
+		$this->set('title_for_layout', 'View User Law');
 		
+		$params = array('fields' => array(
+									'Law.title',
+									'Law.insert_date'));
 		// retrieve all laws information
-		$this->set('laws', $this->Law->find('all'));
+		$this->set('laws', $this->Law->find('all', $params));
 	} 
 	
 }

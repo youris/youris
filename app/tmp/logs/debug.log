@@ -3,3 +3,4 @@
 2011-05-12 11:43:12 Notice: Notice (8): Undefined property: View::$pageTitle in [/Applications/MAMP/htdocs/youris/app/views/laws/index.ctp, line 1]
 2011-05-12 11:43:58 Notice: Notice (8): Undefined property: View::$pageTitle in [/Applications/MAMP/htdocs/youris/app/views/laws/index.ctp, line 1]
 2011-05-12 11:44:41 Notice: Notice (8): Undefined variable: pageTitle in [/Applications/MAMP/htdocs/youris/app/views/laws/index.ctp, line 1]
+2011-05-12 16:21:44 Notice: Notice (8): Undefined index: title in [/Applications/MAMP/htdocs/youris/app/views/laws/index.ctp, line 10]

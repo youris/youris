@@ -22,7 +22,7 @@
 <head>
 	<?php echo $this->Html->charset(); ?>
 	<title>
-		<?php __('Test CakePHP'); ?>
+		Youris - 
 		<?php echo $title_for_layout; ?>
 	</title>
 	<?php
