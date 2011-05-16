@@ -58,14 +58,14 @@ class PostsController extends AppController {
      }
 
      function edit($id = null){
-         //$this->Post->id = $id;
-         // se $_POST non contiene nulla leggo da DB
+         // if $_POST is empty read the information from DB
          if(empty($this->data)) {
-             $this->data = $this->Post->read();
+             $this->data = $this->Law->read();
          }
+         // if $_POST != empty save the information 
          else {
-             if($this->Post->save($this->data)) {
-                 $this->Session->setFlash('Your post has been updated.');
+             if($this->Law->save($this->data)) {
+                 $this->Session->setFlash('Your law has been updated.');
                  $this->redirect(array('action' => 'index'));
              }
          }

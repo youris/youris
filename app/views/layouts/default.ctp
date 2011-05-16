@@ -29,7 +29,8 @@
 		echo $this->Html->meta('icon');
 
                 // includo css
-		echo $this->Html->css('cake.generic');
+		//echo $this->Html->css('cake.generic');
+		echo $this->Html->css('site');
 
 		echo $scripts_for_layout;
 	?>
