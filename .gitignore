@@ -1,0 +1,12 @@
+# Can ignore specific files
+.DS_Store
+
+# Use wildcards as well
+*~
+*.swp
+
+#database configuration
+app/config/database.php
+
+# temp files
+app/tmp/**/*
