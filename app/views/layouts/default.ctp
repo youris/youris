@@ -30,7 +30,7 @@
 
                 // includo css
 		//echo $this->Html->css('cake.generic');
-		echo $this->Html->css('site');
+		echo $this->Html->css('main');
 
 		echo $scripts_for_layout;
 	?>
@@ -39,6 +39,10 @@
 	<div id="container">
 		<div id="header">
 			<h1><?php echo $this->Html->link(__('Youris', true), 'http://www.youris.netsons.org'); ?></h1>
+		</div>
+		<div id="left_content">
+			<?php echo $this->element('loginbox');?>
+			
 		</div>
 		<div id="content">
             <!-- flash message -> impostato con $this->Session->setFlash() -->
