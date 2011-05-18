@@ -963,26 +963,6 @@ class XMLParserComponent extends Object {
     
     return ($html_string);
   }
-  
-  function get_strings()
-  {
-    echo (parse_string());
-  }
-  
-  function get_counters()
-  {
-    echo (parse_count());
-  }
-  
-  function get_json()
-  {
-    echo (parse_json());
-  }
-  
-  function get_html()
-  {
-    echo (parse_html());
-  }
 	
 }
 
