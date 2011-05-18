@@ -1,6 +1,6 @@
 <?php
 
-class XMLParserComponent extends Object {
+class XmlParserComponent extends Object {
 	
   function parse_string()
   {
@@ -964,6 +964,9 @@ class XMLParserComponent extends Object {
     return ($html_string);
   }
 	
+  function hello_world() {
+  	echo "<p>Hello world</p>";
+  }
 }
 
 ?>
