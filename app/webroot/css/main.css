@@ -95,12 +95,44 @@ ul, li {
 	background: grey;
 	text-decoration: underline;
 }
+
+#left_content {
+	width: 150px;
+	height: 100px;
+	float:left;
+	overflow:auto;
+	padding: 5px 5px 5px 5px;
+	
+}
+
+#loginbox {
+	border-right: black 1px solid;
+    border-left: black 1px solid;
+    border-bottom: black 1px solid;
+    border-top: black 1px solid;
+    -moz-border-radius:10px;
+    -khtml-border-radius:10px;
+    -webkit-border-radius:10px;
+    border-radius:10px;
+    background: red;
+}
+
 #content{
 	background: #fff;
-	clear: both;
+	/*clear: both;*/
 	color: #333;
 	padding: 10px 20px 40px 20px;
 	overflow: auto;
+	margin-top: 5px;
+	margin-right: 5px;
+	border-right: black 1px solid;
+    border-left: black 1px solid;
+    border-bottom: black 1px solid;
+    border-top: black 1px solid;
+    -moz-border-radius:10px;
+    -khtml-border-radius:10px;
+    -webkit-border-radius:10px;
+    border-radius:10px;
 }
 #footer {
 	clear: both;

@@ -48,6 +48,10 @@ class LawsController extends AppController {
         $this->redirect(array('action' => 'index'));
 	}
 	
+	function test() {
+		
+	}
+	
 }
 
 ?>
