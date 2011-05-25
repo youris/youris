@@ -31,8 +31,11 @@
                 // includo css
 		//echo $this->Html->css('cake.generic');
 		echo $this->Html->css('main');
+		echo $this->Html->css('ui-lightness/jquery-ui-1.8.13.custom');
 
 		echo $scripts_for_layout;
+		echo $javascript->link('jquery-1.6.1.min');
+		echo $javascript->link('jquery-ui-1.8.13.custom.min');
 	?>
 </head>
 <body>
