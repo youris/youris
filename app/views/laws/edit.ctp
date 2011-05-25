@@ -1,16 +1,17 @@
 <?php  
-if(isset($javascript)) { 
+/*if(isset($javascript)) { 
 	// adding TinyMCE
     echo $javascript->link('tiny_mce/tiny_mce.js');  
-}
+}*/
+	echo $tinyMce->init();
 ?> 
-<script type="text/javascript"> 
+<!-- <script type="text/javascript"> 
     tinyMCE.init({ 
         theme : "simple", 
         mode : "textareas", 
         convert_urls : false 
     }); 
-</script> 
+</script> --> 
 <h1>Law editing</h1>
 
 <?php
