@@ -882,495 +882,546 @@
 		  return ($counters);
 		}
 		
-		function parse_json()
-		{
-		  $file1 = "laws/19603 privacy.xml";
-		  $file2 = "laws/231 01 responsabilità amministrativa.xml";
-		  $file3 = "laws/brunetta.xml";
-		  
-		  $xml = new DomDocument();
-		  $xml->load($file1); // Utilizzare $file2 e $file3 per testare le altre leggi
-		  
-		  // Preleva il tag "DecretoLegislativo" (eventualmente si dovranno gestire gli altri tipi)
-		  // NOTA: getElementsByTagName() ritorna una specie di lista, quindi si deve selezionare
-		  // solo il primo (nonchè unico) elemento.
-		  $law = $xml->documentElement->getElementsByTagName("DecretoLegislativo")->item(0);
-		  
-		  // Contenitore per il json da ritornare
-		  $json;
-		  
-		  // Inizializza i contatori.
-		  $main_part_count = 0;
-		  $main_title_count = 0;
-		  $main_capo_count = 0;
-		  $main_art_count = 0;
-		  
-		  // Variabili per il json
-		  $json_array = array(); // Corrispondente a "DecretoLegislativo"
-		  
-		  $json_array["identifier"] = "id";
-		  $json_array["label"] = "name";
-		  $json_array["items"] = array();
-		  
-		  // Variabili che contengono l'ultimo indice utilizzato negli array per il json di ciascuna categoria
-		  $json_part_index;
-		  $json_title_index;
-		  $json_capo_index;
-		  $json_section_index;
-		  $json_art_index;
-		  
-		  foreach($law->childNodes as $child)
-		  {
-		    switch($child->nodeName)
-		    {
-		      case "articolato":
-		        foreach ($child->childNodes as $articolatoChild)
-		        {
-		          switch ($articolatoChild->nodeName)
-		          {
-		            case "parte":
-		              $main_part_count++;
-		              $local_title_count = 0; // Inizializza contatore locale per i titoli della singola parte
-		              
-		              $part_id = $articolatoChild->getAttribute("id");
-		            
-		              $json_part_array = array();
-		              $json_part_array["id"] = $part_id;
-		              $json_part_array["type"] = "parte";
-		              $json_part_array["name"] = "Parte ".$main_part_count;
-		              $json_part_array["children"] = array();
-		              
-		              $json_array["items"][] = $json_part_array;
-		              
-		              $json_part_index = count($json_array["items"]) - 1;
-		              
-		              foreach($articolatoChild->childNodes as $subPart)
-		              {
-		                switch ($subPart->nodeName)
-		                {
-		                  case "titolo":
-		                    $local_title_count++;
-		                    
-		                    $local_capo_count = 0; // Inizializza contatore locale per i capi del singolo titolo
-		                    
-		                    $title_id = $subPart->getAttribute("id");
-		                    
-		                    $json_title_array = array();
-		                    $json_title_array["id"] = $title_id;
-		                    $json_title_array["type"] = "titlo";
-		                    $json_title_array["name"] = "Titolo ".$local_title_count;
-		                    $json_title_array["children"] = array();
-		                    
-		                    $json_array["items"][$json_part_index]["children"][] = array("_reference" => $title_id);
-		                    $json_array["items"][] = $json_title_array;
-		                    
-		                    $json_title_index = count($json_array["items"]) - 1;
-		                    
-		                    foreach($subPart->childNodes as $title_child)
-		                    {
-		                      switch($title_child->nodeName)
-		                      {
-		                        case "articolo":
-		                          $main_art_count++;
-		                          $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
-		                        
-		                          $art_id = $title_child->getAttribute("id");
-		                        
-		                          $json_art_array = array();
-		                          $json_art_array["id"] = $art_id;
-		                          $json_art_array["type"] = "articolo";
-		                          $json_art_array["name"] = "Articolo ".$main_art_count;
-		                          $json_art_array["children"] = array();
-		                          
-		                          $json_array["items"][$json_title_index]["children"][] = array("_reference" => $art_id);
-		                          $json_array["items"][] = $json_art_array;
-		                          
-		                          $json_art_index = count($json_array["items"]) - 1;
-		                          
-		                          foreach($title_child->childNodes as $art_child)
-		                          { 
-		                            switch($art_child->nodeName)
-		                            {
-		                              case "comma":
-		                                $local_comma_count++;
-		                              
-		                                $comma_id = $art_child->getAttribute("id");
-		                                
-		                                $json_comma_array = array();
-		                                $json_comma_array["id"] = $comma_id;
-		                                $json_comma_array["type"] = "comma";
-		                                $json_comma_array["name"] = "Comma ".$local_comma_count;
-		                                
-		                                $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
-		                                $json_array["items"][] = $json_comma_array;
-		                                break;
-		                              
-		                              default:
-		                                break;
-		                            }
-		                          }
-		                          break;
-		                        
-		                        case "capo":
-		                          $local_capo_count++;
-		                          
-		                          $capo_id = $title_child->getAttribute("id");
-		                        
-		                          $json_capo_array = array();
-		                          $json_capo_array["id"] = $capo_id;
-		                          $json_capo_array["type"] = "capo";
-		                          $json_capo_array["name"] = "Capo ".$local_capo_count;
-		                          $json_capo_array["children"] = array();
-		                          
-		                          $json_array["items"][$json_title_index]["children"][] = array("_reference" => $capo_id);
-		                          $json_array["items"][] = $json_capo_array;
-		                          
-		                          $json_capo_index = count($json_array["items"]) - 1;
-		                          
-		                          foreach($title_child->childNodes as $capo_child)
-		                          {
-		                            switch($capo_child->nodeName)
-		                            {
-		                              case "articolo":
-		                                $main_art_count++;
-		                                $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
-		                              
-		                                $art_id = $capo_child->getAttribute("id");
-		                              
-		                                $json_art_array = array();
-		                                $json_art_array["id"] = $art_id;
-		                                $json_art_array["type"] = "articolo";
-		                                $json_art_array["name"] = "Articolo ".$main_art_count;
-		                                $json_art_array["children"] = array();
-		                                
-		                                $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $art_id);
-		                                $json_array["items"][] = $json_art_array;
-		                                
-		                                $json_art_index = count($json_array["items"]) - 1;
-		                                
-		                                foreach($capo_child->childNodes as $art_child)
-		                                { 
-		                                  switch($art_child->nodeName)
-		                                  {
-		                                    case "comma":
-		                                      $local_comma_count++;
-		                                    
-		                                      $comma_id = $art_child->getAttribute("id");
-		                                      
-		                                      $json_comma_array = array();
-		                                      $json_comma_array["id"] = $comma_id;
-		                                      $json_comma_array["type"] = "comma";
-		                                      $json_comma_array["name"] = "Comma ".$local_comma_count;
-		                                      
-		                                      $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
-		                                      $json_array["items"][] = $json_comma_array;
-		                                      break;
-		                                    
-		                                    default:
-		                                      break;
-		                                  }
-		                                }
-		                                break;
-		                              
-		                              default:
-		                                break;
-		                            }
-		                          }
-		                          break;
-		                        
-		                        default:
-		                          break;
-		                      }
-		                    }
-		                    break;
-		                  
-		                  default:
-		                    break;
-		                }
-		              }
-		              break;
-		            
-		            case "titolo":
-		              $main_title_count++;
-		              $title_id = $articolatoChild->getAttribute("id");
-		            
-		              $json_title_array = array();
-		              $json_title_array["id"] = $title_id;
-		              $json_title_array["type"] = "titolo";
-		              $json_title_array["name"] = "Titolo ".$main_title_count;
-		              $json_title_array["children"] = array();
-		              
-		              $json_array["items"][] = $json_title_array;
-		              
-		              $json_title_index = count($json_array["items"]) - 1;
-		              
-		              foreach($articolatoChild->childNodes as $subTitle)
-		              {
-		                switch ($subTitle->nodeName)
-		                {
-		                  case "articolo":
-		                    $main_art_count++;
-		                    $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
-		                  
-		                    $art_id = $subTitle->getAttribute("id");
-		                  
-		                    $json_art_array = array();
-		                    $json_art_array["id"] = $art_id;
-		                    $json_art_array["type"] = "articolo";
-		                    $json_art_array["name"] = "Articolo ".$main_art_count;
-		                    $json_art_array["children"] = array();
-		                    
-		                    $json_array["items"][$json_title_index]["children"][] = array("_reference" => $art_id);
-		                    $json_array["items"][] = $json_art_array;
-		                    
-		                    $json_art_index = count($json_array["items"]) - 1;
-		                    
-		                    foreach($subTitle->childNodes as $art_child)
-		                    { 
-		                      switch($art_child->nodeName)
-		                      {
-		                        case "comma":
-		                          $local_comma_count++;
-		                        
-		                          $comma_id = $art_child->getAttribute("id");
-		                          
-		                          $json_comma_array = array();
-		                          $json_comma_array["id"] = $comma_id;
-		                          $json_comma_array["type"] = "comma";
-		                          $json_comma_array["name"] = "Comma ".$local_comma_count;
-		                          
-		                          $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
-		                          $json_array["items"][] = $json_comma_array;
-		                          break;
-		                        
-		                        default:
-		                          break;
-		                      }
-		                    }
-		                    break;
-		                    
-		                  case "capo":
-		                    $main_capo_count++;
-		                  
-		                    $capo_id = $subTitle->getAttribute("id");
-		                  
-		                    $json_capo_array = array();
-		                    $json_capo_array["id"] = $capo_id;
-		                    $json_capo_array["type"] = "capo";
-		                    $json_capo_array["name"] = "Capo ".$main_capo_count;
-		                    $json_capo_array["children"] = array();
-		                    
-		                    $json_array["items"][$json_title_index]["children"][] = array("_reference" => $capo_id);
-		                    $json_array["items"][] = $json_capo_array;
-		                    
-		                    $json_capo_index = count($json_array["items"]) - 1;
-		                    
-		                    foreach($subTitle->childNodes as $capo_child)
-		                    {
-		                      switch($capo_child->nodeName)
-		                      {
-		                        case "articolo":
-		                          $main_art_count++;
-		                          $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
-		                        
-		                          $art_id = $capo_child->getAttribute("id");
-		                        
-		                          $json_art_array = array();
-		                          $json_art_array["id"] = $art_id;
-		                          $json_art_array["type"] = "articolo";
-		                          $json_art_array["name"] = "Articolo ".$main_art_count;
-		                          $json_art_array["children"] = array();
-		                          
-		                          $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $art_id);
-		                          $json_array["items"][] = $json_art_array;
-		                          
-		                          $json_art_index = count($json_array["items"]) - 1;
-		                          
-		                          foreach($capo_child->childNodes as $art_child)
-		                          { 
-		                            switch($art_child->nodeName)
-		                            {
-		                              case "comma":
-		                                $local_comma_count++;
-		                              
-		                                $comma_id = $art_child->getAttribute("id");
-		                                
-		                                $json_comma_array = array();
-		                                $json_comma_array["id"] = $comma_id;
-		                                $json_comma_array["type"] = "comma";
-		                                $json_comma_array["name"] = "Comma ".$local_comma_count;
-		                                
-		                                $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
-		                                $json_array["items"][] = $json_comma_array;
-		                                break;
-		                              
-		                              default:
-		                                break;
-		                            }
-		                          }
-		                          break;
-		                        
-		                        default:
-		                          break;
-		                      }
-		                    }
-		                    break;
-		                  
-		                  default:
-		                    break;
-		                }
-		              }
-		              break;
-		            
-		            case "capo":
-		              $main_capo_count++;
-		              $local_section_count = 0;
-		              
-		              $capo_id = $articolatoChild->getAttribute("id");
-		            
-		              $json_capo_array = array();
-		              $json_capo_array["id"] = $capo_id;
-		              $json_capo_array["type"] = "capo";
-		              $json_capo_array["name"] = "Capo ".$main_capo_count;
-		              $json_capo_array["children"] = array();
-		              
-		              $json_array["items"][] = $json_capo_array;
-		              
-		              $json_capo_index = count($json_array["items"]) - 1;
-		              
-		              foreach($articolatoChild->childNodes as $subCapo)
-		              {
-		                switch ($subCapo->nodeName)
-		                {
-		                  case "sezione":
-		                    $local_section_count++;
-		                    
-		                    $section_id = $subCapo->getAttribute("id");
-		                    
-		                    $json_section_array = array();
-		                    $json_section_array["id"] = $section_id;
-		                    $json_section_array["type"] = "sezione";
-		                    $json_section_array["name"] = "Sezione ".$local_section_count;
-		                    $json_section_array["children"] = array();
-		                    
-		                    $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $section_id);
-		                    $json_array["items"][] = $json_section_array;
-		                    
-		                    $json_section_index = count($json_array["items"]) - 1;
-		                    
-		                    foreach($subCapo->childNodes as $section_child)
-		                    {
-		                      switch($section_child->nodeName)
-		                      {
-		                        case "articolo":
-		                          $main_art_count++;
-		                          $local_comma_count = 0;
-		                        
-		                          $art_id = $section_child->getAttribute("id");
-		                        
-		                          $json_art_array = array();
-		                          $json_art_array["id"] = $art_id;
-		                          $json_art_array["type"] = "articolo";
-		                          $json_art_array["name"] = "Articolo ".$main_art_count;
-		                          $json_art_array["children"] = array();
-		                          
-		                          $json_array["items"][$json_section_index]["children"][] = array("_reference" => $art_id);
-		                          $json_array["items"][] = $json_art_array;
-		                          
-		                          $json_art_index = count($json_array["items"]) - 1;
-		                          
-		                          foreach($section_child->childNodes as $art_child)
-		                          { 
-		                            switch($art_child->nodeName)
-		                            {
-		                              case "comma":
-		                                $local_comma_count++;
-		                              
-		                                $comma_id = $art_child->getAttribute("id");
-		                                
-		                                $json_comma_array = array();
-		                                $json_comma_array["id"] = $comma_id;
-		                                $json_comma_array["type"] = "comma";
-		                                $json_comma_array["name"] = "Comma ".$local_comma_count;
-		                                
-		                                $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
-		                                $json_array["items"][] = $json_comma_array;
-		                                break;
-		                              
-		                              default:
-		                                break;
-		                            }
-		                          }
-		                          break;
-		                        
-		                        default:
-		                          break;
-		                      }
-		                    }
-		                    break;
-		                  
-		                  case "articolo":
-		                    $main_art_count++;
-		                    $local_comma_count = 0;
-		                  
-		                    $art_id = $subCapo->getAttribute("id");
-		                  
-		                    $json_art_array = array();
-		                    $json_art_array["id"] = $art_id;
-		                    $json_art_array["type"] = "articolo";
-		                    $json_art_array["name"] = "Articolo ".$main_art_count;
-		                    $json_art_array["children"] = array();
-		                    
-		                    $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $art_id);
-		                    $json_array["items"][] = $json_art_array;
-		                    
-		                    $json_art_index = count($json_array["items"]) - 1;
-		                    
-		                    foreach($subCapo->childNodes as $art_child)
-		                    { 
-		                      switch($art_child->nodeName)
-		                      {
-		                        case "comma":
-		                          $local_comma_count++;
-		                        
-		                          $comma_id = $art_child->getAttribute("id");
-		                          
-		                          $json_comma_array = array();
-		                          $json_comma_array["id"] = $comma_id;
-		                          $json_comma_array["type"] = "comma";
-		                          $json_comma_array["name"] = "Comma ".$local_comma_count;
-		                          
-		                          $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
-		                          $json_array["items"][] = $json_comma_array;
-		                          break;
-		                        
-		                        default:
-		                          break;
-		                      }
-		                    }
-		                    break;
-		                  
-		                  default:
-		                    break;
-		                }
-		              }
-		              break;
-		            
-		            default:
-		              break;
-		        }
-		        }
-		        break;
-		      
-		      default:
-		        break;
-		
-		    }
-		  }
-		  $json = json_encode($json_array);
-		  
-		  return ($json);
-		}
+	  function parse_json()
+    {
+      $file1 = "laws/19603 privacy.xml";
+      $file2 = "laws/231 01 responsabilità amministrativa.xml";
+      $file3 = "laws/brunetta.xml";
+      
+      $xml = new DomDocument();
+      $xml->load($file2); // Utilizzare $file2 e $file3 per testare le altre leggi
+      
+      // Preleva il tag "DecretoLegislativo" (eventualmente si dovranno gestire gli altri tipi)
+      // NOTA: getElementsByTagName() ritorna una specie di lista, quindi si deve selezionare
+      // solo il primo (nonchè unico) elemento.
+      $law = $xml->documentElement->getElementsByTagName("DecretoLegislativo")->item(0);
+      
+      // Contenitore per il json da ritornare
+      $json;
+      
+      // Inizializza i contatori (solo per parti, e articoli - titoli, capi e commi hanno contatori locali).
+      $main_part_count = 0;
+      $main_title_count = 0;
+      $main_capo_count = 0;
+      $main_art_count = 0;
+      
+      // Variabili per il json
+      $json_array = array(); // Corrispondente a "DecretoLegislativo"
+      
+      $json_array["identifier"] = "id";
+      $json_array["label"] = "name";
+      $json_array["items"] = array();
+      
+      // Variabili che contengono l'ultimo indice utilizzato negli array per il json di ciascuna categoria
+      $json_part_index;
+      $json_title_index;
+      $json_capo_index;
+      $json_section_index;
+      $json_art_index;
+      
+      // Variabili booleane per inizializzare radice del tree json
+      $json_global_root = true;
+      $json_part_root = false;
+      $json_title_root = false;
+      $json_capo_root = false;
+      
+      foreach($law->childNodes as $child)
+      {
+        switch($child->nodeName)
+        {
+          case "articolato":
+            foreach ($child->childNodes as $articolatoChild)
+            {
+              switch ($articolatoChild->nodeName)
+              {
+                case "parte":
+                  $main_part_count++;
+                  
+                  if (json_global_root)
+                  {
+                    $json_part_root = true;
+                  }
+                  
+                  $local_title_count = 0; // Inizializza contatore locale per i titoli della singola parte
+                  
+                  $part_id = $articolatoChild->getAttribute("id");
+                
+                  $json_part_array = array();
+                  $json_part_array["id"] = $part_id;
+                  if (json_part_root)
+                  {
+                    $json_part_array["type"] = "root";
+                  }
+                  else
+                  {
+                    $json_part_array["type"] = "parte";
+                  }
+                  $json_part_array["name"] = "Parte ".$main_part_count;
+                  $json_part_array["children"] = array();
+                  
+                  $json_array["items"][] = $json_part_array;
+                  
+                  $json_part_index = count($json_array["items"]) - 1;
+                  
+                  foreach($articolatoChild->childNodes as $subPart)
+                  {
+                    switch ($subPart->nodeName)
+                    {
+                      case "titolo":
+                        $local_title_count++;
+                        
+                        $local_capo_count = 0; // Inizializza contatore locale per i capi del singolo titolo
+                        
+                        $title_id = $subPart->getAttribute("id");
+                        
+                        $json_title_array = array();
+                        $json_title_array["id"] = $title_id;
+                        $json_title_array["type"] = "titlo";
+                        $json_title_array["name"] = "Titolo ".$local_title_count;
+                        $json_title_array["children"] = array();
+                        
+                        $json_array["items"][$json_part_index]["children"][] = array("_reference" => $title_id);
+                        $json_array["items"][] = $json_title_array;
+                        
+                        $json_title_index = count($json_array["items"]) - 1;
+                        
+                        foreach($subPart->childNodes as $title_child)
+                        {
+                          switch($title_child->nodeName)
+                          {
+                            case "articolo":
+                              // Questo è il primo livello di profondità in cui
+                              // si possono trovare i tag "articolo" (cioé come
+                              // tag figli di "titolo").
+                              $main_art_count++;
+                              $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
+                            
+                              $art_id = $title_child->getAttribute("id");
+                            
+                              $json_art_array = array();
+                              $json_art_array["id"] = $art_id;
+                              $json_art_array["type"] = "articolo";
+                              $json_art_array["name"] = "Articolo ".$main_art_count;
+                              $json_art_array["children"] = array();
+                              
+                              $json_array["items"][$json_title_index]["children"][] = array("_reference" => $art_id);
+                              $json_array["items"][] = $json_art_array;
+                              
+                              $json_art_index = count($json_array["items"]) - 1;
+                              
+                              foreach($title_child->childNodes as $art_child)
+                              { 
+                                switch($art_child->nodeName)
+                                {
+                                  case "comma":
+                                    $local_comma_count++;
+                                  
+                                    $comma_id = $art_child->getAttribute("id");
+                                    
+                                    $json_comma_array = array();
+                                    $json_comma_array["id"] = $comma_id;
+                                    $json_comma_array["type"] = "comma";
+                                    $json_comma_array["name"] = "Comma ".$local_comma_count;
+                                    
+                                    $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
+                                    $json_array["items"][] = $json_comma_array;
+                                    break;
+                                  
+                                  default:
+                                    break;
+                                }
+                              }
+                              break;
+                            
+                            case "capo":
+                              $local_capo_count++;
+                              
+                              $capo_id = $title_child->getAttribute("id");
+                            
+                              $json_capo_array = array();
+                              $json_capo_array["id"] = $capo_id;
+                              $json_capo_array["type"] = "capo";
+                              $json_capo_array["name"] = "Capo ".$local_capo_count;
+                              $json_capo_array["children"] = array();
+                              
+                              $json_array["items"][$json_title_index]["children"][] = array("_reference" => $capo_id);
+                              $json_array["items"][] = $json_capo_array;
+                              
+                              $json_capo_index = count($json_array["items"]) - 1;
+                              
+                              foreach($title_child->childNodes as $capo_child)
+                              {
+                                switch($capo_child->nodeName)
+                                {
+                                  case "articolo":
+                                    // Questo è invece il secondo livello a cui si
+                                    // incontrano i tag "articolo" (cioé come figli
+                                    // di "capo" e nipoti di "titolo").
+                                    $main_art_count++;
+                                    $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
+                                  
+                                    $art_id = $capo_child->getAttribute("id");
+                                  
+                                    $json_art_array = array();
+                                    $json_art_array["id"] = $art_id;
+                                    $json_art_array["type"] = "articolo";
+                                    $json_art_array["name"] = "Articolo ".$main_art_count;
+                                    $json_art_array["children"] = array();
+                                    
+                                    $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $art_id);
+                                    $json_array["items"][] = $json_art_array;
+                                    
+                                    $json_art_index = count($json_array["items"]) - 1;
+                                    
+                                    foreach($capo_child->childNodes as $art_child)
+                                    { 
+                                      switch($art_child->nodeName)
+                                      {
+                                        case "comma":
+                                          $local_comma_count++;
+                                        
+                                          $comma_id = $art_child->getAttribute("id");
+                                          
+                                          $json_comma_array = array();
+                                          $json_comma_array["id"] = $comma_id;
+                                          $json_comma_array["type"] = "comma";
+                                          $json_comma_array["name"] = "Comma ".$local_comma_count;
+                                          
+                                          $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
+                                          $json_array["items"][] = $json_comma_array;
+                                          break;
+                                        
+                                        default:
+                                          break;
+                                      }
+                                    }
+                                    break;
+                                  
+                                  default:
+                                    break;
+                                }
+                              }
+                              break;
+                            
+                            default:
+                              break;
+                          }
+                        }
+                        break;
+                      
+                      default:
+                        break;
+                    }
+                  }
+                  break;
+                
+                case "titolo":
+                  $main_title_count++;
+                  
+                  if (json_global_root)
+                  {
+                    $json_title_root = true;
+                  }
+                  
+                  $title_id = $articolatoChild->getAttribute("id");
+                
+                  $json_title_array = array();
+                  $json_title_array["id"] = $title_id;
+                  if (json_title_root)
+                  {
+                    $json_title_array["type"] = "root";
+                  }
+                  else
+                  {
+                    $json_title_array["type"] = "titolo";
+                  }
+                  $json_title_array["name"] = "Titolo ".$main_title_count;
+                  $json_title_array["children"] = array();
+                  
+                  $json_array["items"][] = $json_title_array;
+                  
+                  $json_title_index = count($json_array["items"]) - 1;
+                  
+                  foreach($articolatoChild->childNodes as $subTitle)
+                  {
+                    switch ($subTitle->nodeName)
+                    {
+                      case "articolo":
+                        $main_art_count++;
+                        $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
+                      
+                        $art_id = $subTitle->getAttribute("id");
+                      
+                        $json_art_array = array();
+                        $json_art_array["id"] = $art_id;
+                        $json_art_array["type"] = "articolo";
+                        $json_art_array["name"] = "Articolo ".$main_art_count;
+                        $json_art_array["children"] = array();
+                        
+                        $json_array["items"][$json_title_index]["children"][] = array("_reference" => $art_id);
+                        $json_array["items"][] = $json_art_array;
+                        
+                        $json_art_index = count($json_array["items"]) - 1;
+                        
+                        foreach($subTitle->childNodes as $art_child)
+                        { 
+                          switch($art_child->nodeName)
+                          {
+                            case "comma":
+                              $local_comma_count++;
+                            
+                              $comma_id = $art_child->getAttribute("id");
+                              
+                              $json_comma_array = array();
+                              $json_comma_array["id"] = $comma_id;
+                              $json_comma_array["type"] = "comma";
+                              $json_comma_array["name"] = "Comma ".$local_comma_count;
+                              
+                              $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
+                              $json_array["items"][] = $json_comma_array;
+                              break;
+                            
+                            default:
+                              break;
+                          }
+                        }
+                        break;
+                        
+                      case "capo":
+                        $main_capo_count++;
+                      
+                        $capo_id = $subTitle->getAttribute("id");
+                      
+                        $json_capo_array = array();
+                        $json_capo_array["id"] = $capo_id;
+                        $json_capo_array["type"] = "capo";
+                        $json_capo_array["name"] = "Capo ".$main_capo_count;
+                        $json_capo_array["children"] = array();
+                        
+                        $json_array["items"][$json_title_index]["children"][] = array("_reference" => $capo_id);
+                        $json_array["items"][] = $json_capo_array;
+                        
+                        $json_capo_index = count($json_array["items"]) - 1;
+                        
+                        foreach($subTitle->childNodes as $capo_child)
+                        {
+                          switch($capo_child->nodeName)
+                          {
+                            case "articolo":
+                              $main_art_count++;
+                              $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
+                            
+                              $art_id = $capo_child->getAttribute("id");
+                            
+                              $json_art_array = array();
+                              $json_art_array["id"] = $art_id;
+                              $json_art_array["type"] = "articolo";
+                              $json_art_array["name"] = "Articolo ".$main_art_count;
+                              $json_art_array["children"] = array();
+                              
+                              $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $art_id);
+                              $json_array["items"][] = $json_art_array;
+                              
+                              $json_art_index = count($json_array["items"]) - 1;
+                              
+                              foreach($capo_child->childNodes as $art_child)
+                              { 
+                                switch($art_child->nodeName)
+                                {
+                                  case "comma":
+                                    $local_comma_count++;
+                                  
+                                    $comma_id = $art_child->getAttribute("id");
+                                    
+                                    $json_comma_array = array();
+                                    $json_comma_array["id"] = $comma_id;
+                                    $json_comma_array["type"] = "comma";
+                                    $json_comma_array["name"] = "Comma ".$local_comma_count;
+                                    
+                                    $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
+                                    $json_array["items"][] = $json_comma_array;
+                                    break;
+                                  
+                                  default:
+                                    break;
+                                }
+                              }
+                              break;
+                            
+                            default:
+                              break;
+                          }
+                        }
+                        break;
+                      
+                      default:
+                        break;
+                    }
+                  }
+                  break;
+                
+                case "capo":
+                  $main_capo_count++;
+                  
+                  if (json_global_root)
+                  {
+                    $json_capo_root = true;
+                  }
+                  
+                  $local_section_count = 0;
+                  
+                  $capo_id = $articolatoChild->getAttribute("id");
+                
+                  $json_capo_array = array();
+                  $json_capo_array["id"] = $capo_id;
+                  if (json_capo_root)
+                  {
+                    $json_capo_array["type"] = "root";
+                  }
+                  else
+                  {
+                    $json_capo_array["type"] = "capo";
+                  }
+                  $json_capo_array["name"] = "Capo ".$main_capo_count;
+                  $json_capo_array["children"] = array();
+                  
+                  $json_array["items"][] = $json_capo_array;
+                  
+                  $json_capo_index = count($json_array["items"]) - 1;
+                  
+                  foreach($articolatoChild->childNodes as $subCapo)
+                  {
+                    switch ($subCapo->nodeName)
+                    {
+                      case "sezione":
+                        $local_section_count++;
+                        
+                        $section_id = $subCapo->getAttribute("id");
+                        
+                        $json_section_array = array();
+                        $json_section_array["id"] = $section_id;
+                        $json_section_array["type"] = "sezione";
+                        $json_section_array["name"] = "Sezione ".$local_section_count;
+                        $json_section_array["children"] = array();
+                        
+                        $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $section_id);
+                        $json_array["items"][] = $json_section_array;
+                        
+                        $json_section_index = count($json_array["items"]) - 1;
+                        
+                        foreach($subCapo->childNodes as $section_child)
+                        {
+                          switch($section_child->nodeName)
+                          {
+                            case "articolo":
+                              $main_art_count++;
+                              $local_comma_count = 0;
+                            
+                              $art_id = $section_child->getAttribute("id");
+                            
+                              $json_art_array = array();
+                              $json_art_array["id"] = $art_id;
+                              $json_art_array["type"] = "articolo";
+                              $json_art_array["name"] = "Articolo ".$main_art_count;
+                              $json_art_array["children"] = array();
+                              
+                              $json_array["items"][$json_section_index]["children"][] = array("_reference" => $art_id);
+                              $json_array["items"][] = $json_art_array;
+                              
+                              $json_art_index = count($json_array["items"]) - 1;
+                              
+                              foreach($section_child->childNodes as $art_child)
+                              { 
+                                switch($art_child->nodeName)
+                                {
+                                  case "comma":
+                                    $local_comma_count++;
+                                  
+                                    $comma_id = $art_child->getAttribute("id");
+                                    
+                                    $json_comma_array = array();
+                                    $json_comma_array["id"] = $comma_id;
+                                    $json_comma_array["type"] = "comma";
+                                    $json_comma_array["name"] = "Comma ".$local_comma_count;
+                                    
+                                    $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
+                                    $json_array["items"][] = $json_comma_array;
+                                    break;
+                                  
+                                  default:
+                                    break;
+                                }
+                              }
+                              break;
+                            
+                            default:
+                              break;
+                          }
+                        }
+                        break;
+                      
+                      case "articolo":
+                        $main_art_count++;
+                        $local_comma_count = 0;
+                      
+                        $art_id = $subCapo->getAttribute("id");
+                      
+                        $json_art_array = array();
+                        $json_art_array["id"] = $art_id;
+                        $json_art_array["type"] = "articolo";
+                        $json_art_array["name"] = "Articolo ".$main_art_count;
+                        $json_art_array["children"] = array();
+                        
+                        $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $art_id);
+                        $json_array["items"][] = $json_art_array;
+                        
+                        $json_art_index = count($json_array["items"]) - 1;
+                        
+                        foreach($subCapo->childNodes as $art_child)
+                        { 
+                          switch($art_child->nodeName)
+                          {
+                            case "comma":
+                              $local_comma_count++;
+                            
+                              $comma_id = $art_child->getAttribute("id");
+                              
+                              $json_comma_array = array();
+                              $json_comma_array["id"] = $comma_id;
+                              $json_comma_array["type"] = "comma";
+                              $json_comma_array["name"] = "Comma ".$local_comma_count;
+                              
+                              $json_array["items"][$json_art_index]["children"][] = array("_reference" => $comma_id);
+                              $json_array["items"][] = $json_comma_array;
+                              break;
+                            
+                            default:
+                              break;
+                          }
+                        }
+                        break;
+                      
+                      default:
+                        break;
+                    }
+                  }
+                  break;
+                
+                default:
+                  break;
+            }
+            }
+            break;
+          
+          default:
+            break;
+    
+        }
+      }
+      $json = json_encode($json_array);
+      
+      return ($json);
+    }
 		
 		function parse_html()
 		{
