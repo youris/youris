@@ -882,14 +882,14 @@
 		  return ($counters);
 		}
 		
-	  function parse_json()
+    function parse_json()
     {
       $file1 = "laws/19603 privacy.xml";
       $file2 = "laws/231 01 responsabilità amministrativa.xml";
       $file3 = "laws/brunetta.xml";
       
       $xml = new DomDocument();
-      $xml->load($file2); // Utilizzare $file2 e $file3 per testare le altre leggi
+      $xml->load($file1); // Utilizzare $file2 e $file3 per testare le altre leggi
       
       // Preleva il tag "DecretoLegislativo" (eventualmente si dovranno gestire gli altri tipi)
       // NOTA: getElementsByTagName() ritorna una specie di lista, quindi si deve selezionare
@@ -903,7 +903,7 @@
       $main_part_count = 0;
       $main_title_count = 0;
       $main_capo_count = 0;
-      $main_art_count = 0;
+      //$main_art_count = 0;
       
       // Variabili per il json
       $json_array = array(); // Corrispondente a "DecretoLegislativo"
@@ -937,9 +937,10 @@
                 case "parte":
                   $main_part_count++;
                   
-                  if (json_global_root)
+                  if ($json_global_root)
                   {
                     $json_part_root = true;
+                    $json_global_root = false;
                   }
                   
                   $local_title_count = 0; // Inizializza contatore locale per i titoli della singola parte
@@ -993,7 +994,7 @@
                               // Questo è il primo livello di profondità in cui
                               // si possono trovare i tag "articolo" (cioé come
                               // tag figli di "titolo").
-                              $main_art_count++;
+                              //$main_art_count++;
                               $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
                             
                               $art_id = $title_child->getAttribute("id");
@@ -1001,7 +1002,8 @@
                               $json_art_array = array();
                               $json_art_array["id"] = $art_id;
                               $json_art_array["type"] = "articolo";
-                              $json_art_array["name"] = "Articolo ".$main_art_count;
+                              $json_art_array["name"] = "Articolo ".substr($art_id, 3);
+                              //$json_art_array["name"] = "Articolo ".$main_art_count;
                               $json_art_array["children"] = array();
                               
                               $json_array["items"][$json_title_index]["children"][] = array("_reference" => $art_id);
@@ -1057,7 +1059,7 @@
                                     // Questo è invece il secondo livello a cui si
                                     // incontrano i tag "articolo" (cioé come figli
                                     // di "capo" e nipoti di "titolo").
-                                    $main_art_count++;
+                                    //$main_art_count++;
                                     $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
                                   
                                     $art_id = $capo_child->getAttribute("id");
@@ -1065,7 +1067,8 @@
                                     $json_art_array = array();
                                     $json_art_array["id"] = $art_id;
                                     $json_art_array["type"] = "articolo";
-                                    $json_art_array["name"] = "Articolo ".$main_art_count;
+                                    $json_art_array["name"] = "Articolo ".substr($art_id, 3);
+                                    //$json_art_array["name"] = "Articolo ".$main_art_count;
                                     $json_art_array["children"] = array();
                                     
                                     $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $art_id);
@@ -1118,9 +1121,10 @@
                 case "titolo":
                   $main_title_count++;
                   
-                  if (json_global_root)
+                  if ($json_global_root)
                   {
                     $json_title_root = true;
+                    $json_global_root = false;
                   }
                   
                   $title_id = $articolatoChild->getAttribute("id");
@@ -1147,7 +1151,7 @@
                     switch ($subTitle->nodeName)
                     {
                       case "articolo":
-                        $main_art_count++;
+                        //$main_art_count++;
                         $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
                       
                         $art_id = $subTitle->getAttribute("id");
@@ -1155,7 +1159,8 @@
                         $json_art_array = array();
                         $json_art_array["id"] = $art_id;
                         $json_art_array["type"] = "articolo";
-                        $json_art_array["name"] = "Articolo ".$main_art_count;
+                        $json_art_array["name"] = "Articolo ".substr($art_id, 3);
+                        //$json_art_array["name"] = "Articolo ".$main_art_count;
                         $json_art_array["children"] = array();
                         
                         $json_array["items"][$json_title_index]["children"][] = array("_reference" => $art_id);
@@ -1208,7 +1213,7 @@
                           switch($capo_child->nodeName)
                           {
                             case "articolo":
-                              $main_art_count++;
+                              //$main_art_count++;
                               $local_comma_count = 0; // Inizializza contatore locale per i commi del singolo articolo
                             
                               $art_id = $capo_child->getAttribute("id");
@@ -1216,7 +1221,8 @@
                               $json_art_array = array();
                               $json_art_array["id"] = $art_id;
                               $json_art_array["type"] = "articolo";
-                              $json_art_array["name"] = "Articolo ".$main_art_count;
+                              $json_art_array["name"] = "Articolo ".substr($art_id, 3);
+                              //$json_art_array["name"] = "Articolo ".$main_art_count;
                               $json_art_array["children"] = array();
                               
                               $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $art_id);
@@ -1263,9 +1269,10 @@
                 case "capo":
                   $main_capo_count++;
                   
-                  if (json_global_root)
+                  if ($json_global_root)
                   {
                     $json_capo_root = true;
+                    $json_global_root = false;
                   }
                   
                   $local_section_count = 0;
@@ -1314,7 +1321,7 @@
                           switch($section_child->nodeName)
                           {
                             case "articolo":
-                              $main_art_count++;
+                              //$main_art_count++;
                               $local_comma_count = 0;
                             
                               $art_id = $section_child->getAttribute("id");
@@ -1322,7 +1329,8 @@
                               $json_art_array = array();
                               $json_art_array["id"] = $art_id;
                               $json_art_array["type"] = "articolo";
-                              $json_art_array["name"] = "Articolo ".$main_art_count;
+                              $json_art_array["name"] = "Articolo ".substr($art_id, 3);
+                              //$json_art_array["name"] = "Articolo ".$main_art_count;
                               $json_art_array["children"] = array();
                               
                               $json_array["items"][$json_section_index]["children"][] = array("_reference" => $art_id);
@@ -1361,7 +1369,7 @@
                         break;
                       
                       case "articolo":
-                        $main_art_count++;
+                        //$main_art_count++;
                         $local_comma_count = 0;
                       
                         $art_id = $subCapo->getAttribute("id");
@@ -1369,7 +1377,8 @@
                         $json_art_array = array();
                         $json_art_array["id"] = $art_id;
                         $json_art_array["type"] = "articolo";
-                        $json_art_array["name"] = "Articolo ".$main_art_count;
+                        $json_art_array["name"] = "Articolo ".substr($art_id, 3);
+                        //$json_art_array["name"] = "Articolo ".$main_art_count;
                         $json_art_array["children"] = array();
                         
                         $json_array["items"][$json_capo_index]["children"][] = array("_reference" => $art_id);
