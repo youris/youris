@@ -29,13 +29,9 @@
 		echo $this->Html->meta('icon');
 
                 // includo css
-		//echo $this->Html->css('cake.generic');
-		echo $this->Html->css('main');
-		echo $this->Html->css('ui-lightness/jquery-ui-1.8.13.custom');
+		echo $this->Html->css('cake.generic');
 
 		echo $scripts_for_layout;
-		echo $javascript->link('jquery-1.6.1.min');
-		echo $javascript->link('jquery-ui-1.8.13.custom.min');
 	?>
 </head>
 <body>
@@ -43,13 +39,12 @@
 		<div id="header">
 			<h1><?php echo $this->Html->link(__('Youris', true), 'http://www.youris.netsons.org'); ?></h1>
 		</div>
-		<div id="left_content">
-			<?php echo $this->element('loginbox');?>
-			
-		</div>
 		<div id="content">
             <!-- flash message -> impostato con $this->Session->setFlash() -->
-			<?php echo $this->Session->flash(); ?>
+			<?php
+				echo $this->Session->flash(); 
+				//echo $this->Session->flash('auth'); 
+				?>
 
 			<?php echo $content_for_layout; ?> <!-- stampa contenuto della vista -->
 
