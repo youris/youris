@@ -1,3 +1,8 @@
 2011-05-12 11:43:12 Warning: Warning (512): <span style="color:Red;text-align:left"><b>SQL Error:</b> 1054: Unknown column 'Law.law_type_id' in 'on clause'</span> in [/Applications/MAMP/htdocs/youris/cake/libs/model/datasources/dbo_source.php, line 684]
 2011-05-12 11:43:12 Warning: Warning (2): Invalid argument supplied for foreach() in [/Applications/MAMP/htdocs/youris/app/views/laws/index.ctp, line 8]
 2011-06-09 22:12:47 Warning: Warning (2): Cannot modify header information - headers already sent by (output started at /var/www/workspace_php/youris/cake/libs/debugger.php:673) in [/var/www/workspace_php/youris/cake/libs/controller/controller.php, line 742]
+2011-06-10 12:38:32 Warning: Warning (2): mysql_connect() [http://php.net/function.mysql-connect]: Access denied for user 'root'@'localhost' (using password: NO) in [/var/www/youris/cake/libs/model/datasources/dbo/dbo_mysql.php, line 552]
+2011-06-10 12:38:32 Warning: Warning (2): mysql_select_db() expects parameter 2 to be resource, boolean given in [/var/www/youris/cake/libs/model/datasources/dbo/dbo_mysql.php, line 558]
+2011-06-10 12:38:32 Warning: Warning (2): mysql_get_server_info() expects parameter 1 to be resource, boolean given in [/var/www/youris/cake/libs/model/datasources/dbo/dbo_mysql.php, line 566]
+2011-06-10 12:38:32 Warning: Warning (2): mysql_query() expects parameter 2 to be resource, boolean given in [/var/www/youris/cake/libs/model/datasources/dbo/dbo_mysql.php, line 600]
+2011-06-10 12:38:32 Warning: Warning (2): Cannot modify header information - headers already sent by (output started at /var/www/youris/cake/libs/debugger.php:673) in [/var/www/youris/cake/libs/controller/controller.php, line 742]
